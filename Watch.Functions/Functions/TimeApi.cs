@@ -24,7 +24,7 @@ namespace Watch.Functions.Functions
             [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
             ILogger log)
         {
-            log.LogInformation("Recieved a new time.");
+            log.LogInformation("New time received.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             Time time = JsonConvert.DeserializeObject<Time>(requestBody);
@@ -36,14 +36,14 @@ namespace Watch.Functions.Functions
                 return new BadRequestObjectResult(new Response
                 {
                     IsSuccess = true,
-                    Message = "The request must have a Employee Id, Date and Type, please insert all fields."
+                    Message = "Please insert EmployeeId, Date and Type."
                 });
             }
 
             TimeEntity timeEntity = new TimeEntity
             {
                 EmployeeId = time.EmployeeId,
-                Date = DateTime.UtcNow,
+                Date = time.Date,
                 Type = time.Type,
                 IsConsolidated = false,
                 ETag = "*",
@@ -77,7 +77,7 @@ namespace Watch.Functions.Functions
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             Time time = JsonConvert.DeserializeObject<Time>(requestBody);
 
-            // Validate time id
+            // Validate
             TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", id);
             TableResult findResult = await timeTable.ExecuteAsync(findOperation);
             if (findResult.Result == null)
@@ -89,7 +89,7 @@ namespace Watch.Functions.Functions
                 });
             }
 
-            // Update time
+            // Update
             TimeEntity timeEntity = (TimeEntity)findResult.Result;
             if (!string.IsNullOrEmpty(time.EmployeeId.ToString()) &&
                 !string.IsNullOrEmpty(time.Date.ToString()) &&
