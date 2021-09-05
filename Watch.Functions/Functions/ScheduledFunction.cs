@@ -16,7 +16,7 @@ namespace Watch.Functions.Functions
     {
         [FunctionName("ScheduledFunction")]
         public static async Task Run(
-           [TimerTrigger("0 */60 * * * *")] TimerInfo myTimer,
+           [TimerTrigger("0 */1 * * * *")] TimerInfo myTimer,
            [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timeTable,
            [Table("consolidated", Connection = "AzureWebJobsStorage")] CloudTable consolidatedTable,
            ILogger log)
@@ -76,7 +76,7 @@ namespace Watch.Functions.Functions
                                 ConsolidatedEntity consolidatedEntity = new ConsolidatedEntity
                                 {
                                     EmployeeId = vecTimes[i].EmployeeId,
-                                    Date = DateTime.Today,
+                                    Date = vecTimes[i].Date,
                                     MinutesWork = (int)minutes,
                                     ETag = "*",
                                     PartitionKey = "CONSOLIDATED",
@@ -99,13 +99,15 @@ namespace Watch.Functions.Functions
 
 
                             }
-                            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", vecTimes[i].RowKey);
-                            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
-                            TimeEntity timeEntity = (TimeEntity)findResult.Result;
-                            timeEntity.IsConsolidated = true;
-                            TableOperation addOperation = TableOperation.Replace(timeEntity);
-                            await timeTable.ExecuteAsync(addOperation);
+                            
                         }
+
+                        TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", vecTimes[i].RowKey);
+                        TableResult findResult = await timeTable.ExecuteAsync(findOperation);
+                        TimeEntity timeEntity = (TimeEntity)findResult.Result;
+                        timeEntity.IsConsolidated = true;
+                        TableOperation addOperation = TableOperation.Replace(timeEntity);
+                        await timeTable.ExecuteAsync(addOperation);
                     }
                 }
                 catch (Exception e)

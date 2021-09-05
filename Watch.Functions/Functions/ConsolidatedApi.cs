@@ -102,13 +102,14 @@ namespace Watch.Functions.Functions
                                 
                                 
                             }
-                            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", vecTimes[i].RowKey);
-                            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
-                            TimeEntity timeEntity = (TimeEntity)findResult.Result;
-                            timeEntity.IsConsolidated = true;
-                            TableOperation addOperation = TableOperation.Replace(timeEntity);
-                            await timeTable.ExecuteAsync(addOperation);
+                            
                         }
+                        TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", vecTimes[i].RowKey);
+                        TableResult findResult = await timeTable.ExecuteAsync(findOperation);
+                        TimeEntity timeEntity = (TimeEntity)findResult.Result;
+                        timeEntity.IsConsolidated = true;
+                        TableOperation addOperation = TableOperation.Replace(timeEntity);
+                        await timeTable.ExecuteAsync(addOperation);
                     }
                 }
                 catch (Exception e)
