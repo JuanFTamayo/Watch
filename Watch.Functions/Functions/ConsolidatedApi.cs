@@ -65,7 +65,7 @@ namespace Watch.Functions.Functions
                 {
                     for (int i = 0; i < duo; i++)
                     {
-                        await SetIsConsolidatedAsync(vecTimes[i].RowKey, timeTable);
+                       
                         if (i % 2 != 0 && vecTimes.Length > 1)
                         {
                             minutes = 0;
@@ -102,6 +102,12 @@ namespace Watch.Functions.Functions
                                 
                                 
                             }
+                            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", vecTimes[i].RowKey);
+                            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
+                            TimeEntity timeEntity = (TimeEntity)findResult.Result;
+                            timeEntity.IsConsolidated = true;
+                            TableOperation addOperation = TableOperation.Replace(timeEntity);
+                            await timeTable.ExecuteAsync(addOperation);
                         }
                     }
                 }
@@ -122,15 +128,7 @@ namespace Watch.Functions.Functions
             });
         }
 
-        private static async Task SetIsConsolidatedAsync(string id, CloudTable timeTable)
-        {
-            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", id);
-            TableResult findResult = await timeTable.ExecuteAsync(findOperation);
-            TimeEntity timeEntity = (TimeEntity)findResult.Result;
-            timeEntity.IsConsolidated = true;
-            TableOperation addOperation = TableOperation.Replace(timeEntity);
-            await timeTable.ExecuteAsync(addOperation);
-        }
+       
 
         
     }
