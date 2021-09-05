@@ -12,7 +12,7 @@ using Watch.Functions.Entities;
 
 namespace Watch.Functions.Functions
 {
-    class ScheduledFunction
+    public class ScheduledFunction
     {
         [FunctionName("ScheduledFunction")]
         public static async Task Run(

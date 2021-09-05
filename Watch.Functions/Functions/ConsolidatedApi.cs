@@ -14,7 +14,7 @@ using Watch.Functions.Entities;
 
 namespace Watch.Functions.Functions
 {
-    class ConsolidatedApi
+    public class ConsolidatedApi
     {
 
         [FunctionName(nameof(Consolidated))]
