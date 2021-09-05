@@ -79,7 +79,7 @@ namespace Watch.Functions.Functions
                                 ConsolidatedEntity consolidatedEntity = new ConsolidatedEntity
                                 {
                                     EmployeeId = vecTimes[i].EmployeeId,
-                                    Date = DateTime.Today,
+                                    Date = vecTimes[i].Date,
                                     MinutesWork = (int)minutes,
                                     ETag = "*",
                                     PartitionKey = "CONSOLIDATED",
@@ -128,8 +128,47 @@ namespace Watch.Functions.Functions
             });
         }
 
-       
+        [FunctionName(nameof(GetConsolidateByDate))]
+        public static async Task<IActionResult> GetConsolidateByDate(
+         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidate/{d}")] HttpRequest req,
+         [Table("consolidated", Connection = "AzureWebJobsStorage")] CloudTable consolidatedTable,
+         string d,
+         ILogger log)
+        {
+            log.LogInformation($"Getting all the consolidates for day {d}.");
 
-        
+            DateTime date = DateTime.Parse(d);
+            DateTime finalDate = DateTime.Parse(d + " 23:59 ");
+
+            TableQuery<ConsolidatedEntity> consolidatedQuery = new TableQuery<ConsolidatedEntity>();
+            TableQuerySegment<ConsolidatedEntity> allConsolidated = await consolidatedTable.ExecuteQuerySegmentedAsync(consolidatedQuery, null);
+            List<ConsolidatedEntity> consolidatedInRange = new List<ConsolidatedEntity>();
+
+            int i = allConsolidated.Count();
+
+            foreach (ConsolidatedEntity consolidated in allConsolidated)
+            {
+                if (consolidated.Date >= date && consolidated.Date <= finalDate)
+                {
+                    consolidatedInRange.Add(consolidated);
+                }
+            }
+
+                string message = $"Consolidates for date: {d} retrieved";
+                log.LogInformation(message);
+            
+           
+
+            return new OkObjectResult(new Response
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = consolidatedInRange
+            });
+        }
+
+
+
+
     }
 }
